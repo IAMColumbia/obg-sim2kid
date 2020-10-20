@@ -13,6 +13,7 @@ namespace OneButtonGame
         SpriteBatch spriteBatch;
 
         PlayerController slime;
+        LevelManager lm;
 
         public Game1()
         {
@@ -23,6 +24,8 @@ namespace OneButtonGame
             graphics.PreferredBackBufferHeight = (int) (720 * 1);   // set this value to the desired height of your window
             graphics.ApplyChanges();
 
+            lm = new LevelManager(this);
+            this.Components.Add(lm);
             slime = new PlayerController(this);
             this.Components.Add(slime);
         }

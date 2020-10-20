@@ -18,14 +18,15 @@ namespace OneButtonGame
             get { return _mass; }
             set { if (value == 0) _mass = 1; else _mass = value; }
         }
-        private List<HitBox> HitBoxes;
+        public List<HitBox> HitBoxes;
         public float Friction
         {
             get { return _friction; }
             set { if (value < 0) _friction = 0; else if (value > 1) _friction = 1; else _friction = value; }
         }
+        public float Gravity;
+        public bool collisions;
 
-        private float _gravity;
         private float _mass;
         private float _friction;
         private Game _game;
@@ -36,7 +37,7 @@ namespace OneButtonGame
 
 
         #region Constructors
-        private void init(Game game, Vector2 speed, float mass, Vector2 acceleration, List<HitBox> boxes, float friction, float gravity, Transform transform)
+        private void init(Game game, Vector2 speed, float mass, Vector2 acceleration, List<HitBox> boxes, float friction, float gravity)
         {
             _game = game;
             Speed = speed;
@@ -44,60 +45,62 @@ namespace OneButtonGame
             Acceleration = acceleration;
             HitBoxes = boxes;
             Friction = friction;
-            _gravity = gravity;
-            _transform = transform;
+            Gravity = gravity;
+            collisions = false;
 
-            _hitTracker = (HitBoxTrackerService) _game.Services.GetService(typeof(IHitBoxTrackerService));
+            _hitTracker = (HitBoxTrackerService)_game.Services.GetService(typeof(IHitBoxTrackerService));
+            Console.WriteLine(_hitTracker == null);
             if (_hitTracker == null)
             {
                 _hitTracker = new HitBoxTrackerService(_game);
-                _game.Services.AddService(_hitTracker);
-            }
-
-            registerHitboxes();
-            foreach (HitBox box in HitBoxes)
-            {
-                Vector2 origin = box.Origin;
-                origin += _transform.Position;
-                box.Origin = origin;
+                this._game.Services.AddService((IHitBoxTrackerService)_hitTracker);
             }
         }
-        public RigidBody(Game game, Transform transform)
+        public RigidBody(Game game)
         {
-            init(game, Vector2.Zero, 1, Vector2.Zero, new List<HitBox>(), 0.15f, 9.8f, transform);
+            init(game, Vector2.Zero, 1, Vector2.Zero, new List<HitBox>(), 0.15f, 9.8f);
         }
-        public RigidBody(Game game, Transform transform, float mass, float friction, float gravity)
+        public RigidBody(Game game, float mass, float friction, float gravity)
         {
-            init(game, Vector2.Zero, mass, Vector2.Zero, new List<HitBox>(), friction, gravity, transform);
+            init(game, Vector2.Zero, mass, Vector2.Zero, new List<HitBox>(), friction, gravity);
         }
-        public RigidBody(Game game, Transform transform, float mass, float friction, float gravity, List<HitBox> hitBoxes)
+        public RigidBody(Game game, float mass, float friction, float gravity, List<HitBox> hitBoxes)
         {
-            init(game, Vector2.Zero, mass, Vector2.Zero, hitBoxes, friction, gravity, transform);
+            init(game, Vector2.Zero, mass, Vector2.Zero, hitBoxes, friction, gravity);
         }
         #endregion
-
-      
-
+        
+        public void LoadContent(Transform transform)
+        {
+            _transform = transform;
+            registerHitboxes();
+        }
         public void Update(GameTime gameTime)
         {
             updateSpeed(gameTime);
-            short reflection = checkColliders();
-            if ((reflection & 0b01) == 0b01)
+            if (collisions)
             {
-                //reflect X
-                Speed *= new Vector2(-1, 1);
+                short reflection = checkColliders();
+                if (reflection > 0b00)
+                {
+                    Speed *= 1 - Friction;
+                }
+                if ((reflection & 0b01) == 0b01)
+                {
+                    //reflect X
+                    Speed *= new Vector2(-1, 1);
+                }
+                if ((reflection & 0b10) == 0b10)
+                {
+                    //reflect Y
+                    Speed *= new Vector2(1, -1);
+                }
+                if (Speed.LengthSquared() < 0.000001f)
+                {
+                    Speed = Vector2.Zero;
+                }
             }
-            if ((reflection & 0b10) == 0b10)
-            {
-                //reflect Y
-                Speed *= new Vector2(1, -1);
-            }
-            foreach (HitBox box in HitBoxes)
-            {
-                Vector2 origin = box.Origin;
-                origin += Speed;
-                box.Origin = origin;
-            }
+
             _transform.Position += Speed;
         }
 
@@ -110,7 +113,7 @@ namespace OneButtonGame
         private void updateSpeed(GameTime gameTime)
         {
             Speed += Acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Speed += new Vector2(0, 1) * _gravity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Speed += new Vector2(0, 1) * Gravity * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
         private short checkColliders()
         {
@@ -144,6 +147,7 @@ namespace OneButtonGame
                 {
                     reflect += 0b10;
                 }
+                Console.WriteLine(reflect);
             }
             return reflect;
         }

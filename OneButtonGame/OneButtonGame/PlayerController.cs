@@ -11,10 +11,10 @@ namespace OneButtonGame
 {
     public class PlayerController : Sprite
     {
-        public EPlayerState PlayerState;
+        public EPlayerState State;
 
         private JumpHandler _jumper;
-        private RigidBody _rigidBody;
+        private RigidBody _rigidBody; //TODO: Reduce player down to a GameObject
 
         protected GraphicsDeviceManager graphics;
         protected SpriteBatch spriteBatch;
@@ -25,6 +25,7 @@ namespace OneButtonGame
         {
             _game = game;
             _jumper = new JumpHandler(this, game);
+            State = EPlayerState.falling;
         }
 
 
@@ -32,10 +33,18 @@ namespace OneButtonGame
         public override void Initialize()
         {
             graphics = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
+            _rigidBody = new RigidBody(_game, 10f, 0.5f, 20f);
+            _rigidBody.collisions = true;
             base.Initialize();
+        }
+        protected override void LoadContent()
+        {
             List<HitBox> boxes = new List<HitBox>();
-            boxes.Add(new HitBox(new Rectangle(transform.Position.X, transform.Position.Y, spriteTexture.Bounds.Width, spriteTexture.Bounds.Height)));
-            _rigidBody = new RigidBody(_game, transform, 10f, 0.5f, 20f, boxes);
+            base.LoadContent();
+            boxes.Add(new HitBox(new Rectangle(transform.Position.X, transform.Position.Y, spriteTexture.Bounds.Width, spriteTexture.Bounds.Height), transform));
+            _rigidBody.HitBoxes = boxes;
+            _rigidBody.LoadContent(transform);
+            
         }
         public override void Update(GameTime gameTime)
         {
@@ -51,19 +60,21 @@ namespace OneButtonGame
 
         public void PrepareJump()
         {
-
+            State = EPlayerState.jumping;
         }
         public void Jump()
         {
-
+            State = EPlayerState.falling;
         }
         public void Land()
         {
-
+            State = EPlayerState.landing;
+            State = EPlayerState.idle;
         }
         public void Die()
         {
-
+            State = EPlayerState.dying;
+            State = EPlayerState.dead;
         }
     }
 
@@ -73,6 +84,7 @@ namespace OneButtonGame
         jumping,
         falling,
         landing,
-        dying
+        dying,
+        dead
     }
 }

@@ -12,23 +12,31 @@ namespace OneButtonGame
     public class HitBox
     {
         private int _trackingID;
-        public Rectangle Rect;
+        private Rectangle _rect;
+        private Transform _transform;
+        public Rectangle Rect { get { return offsetRect(); } }
         public int TrackingID
         {
             get { return _trackingID; }
             set { if (_trackingID == -1) _trackingID = value; }
         }
+        public Vector2 Origin { get { return new Vector2(_transform.Position.X + _rect.X, _transform.Position.Y + _rect.Y); }}
+        
 
-        public Vector2 Origin { get { return Rect.Origin; } set { Rect.Origin = value; } }
-
-        public HitBox(Rectangle rect) {
+        public HitBox(Rectangle rect, Transform transform) {
             _trackingID = -1;
-            Rect = rect;
+            _rect = rect;
+            _transform = transform;
         }
 
         public bool CheckCollision(HitBox other)
         {
             return CheckCollision(this, other);
+        }
+
+        private Rectangle offsetRect()
+        {
+            return new Rectangle(_transform.Position.X + _rect.X, _transform.Position.Y + _rect.Y, _rect.Width, _rect.Height);
         }
 
         public static bool CheckCollision(HitBox A, HitBox B)
