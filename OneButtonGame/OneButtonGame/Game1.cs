@@ -12,10 +12,15 @@ namespace OneButtonGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        PlayerController slime;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            
+            slime = new PlayerController(this, jumper);
+            this.Components.Add(slime);
         }
 
         /// <summary>
