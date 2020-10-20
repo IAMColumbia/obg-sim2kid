@@ -42,8 +42,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Game1.cs" />
+    <Compile Include="HitBox.cs" />
+    <Compile Include="HitBoxTrackerService.cs" />
+    <Compile Include="IHitBoxTrackerService.cs" />
+    <Compile Include="JumpHandler.cs" />
+    <Compile Include="PlayerController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rectangle.cs" />
+    <Compile Include="RigidBody.cs" />
+    <Compile Include="Sprite.cs" />
+    <Compile Include="Transform.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

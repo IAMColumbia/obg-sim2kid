@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace OneButtonGame
 {
-    class JumpHandler
+    public class JumpHandler
     {
         private PlayerController _player;
         private Sprite _dash;
@@ -48,7 +48,7 @@ namespace OneButtonGame
         }
     }
 
-    enum EJumpHandler
+    public enum EJumpHandler
     {
         hidden,
         showing,

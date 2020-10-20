@@ -18,8 +18,12 @@ namespace OneButtonGame
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            
-            slime = new PlayerController(this, jumper);
+
+            graphics.PreferredBackBufferWidth = (int) (1280 * 1);  // set this value to the desired width of your window
+            graphics.PreferredBackBufferHeight = (int) (720 * 1);   // set this value to the desired height of your window
+            graphics.ApplyChanges();
+
+            slime = new PlayerController(this);
             this.Components.Add(slime);
         }
 
@@ -78,7 +82,7 @@ namespace OneButtonGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White);
 
             // TODO: Add your drawing code here
 
