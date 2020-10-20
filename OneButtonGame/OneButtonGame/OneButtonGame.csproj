@@ -47,6 +47,7 @@
     <Compile Include="HitBoxTrackerService.cs" />
     <Compile Include="IHitBoxTrackerService.cs" />
     <Compile Include="JumpHandler.cs" />
+    <Compile Include="KeyboardHandler.cs" />
     <Compile Include="LevelManager.cs" />
     <Compile Include="PlayerController.cs" />
     <Compile Include="Program.cs" />

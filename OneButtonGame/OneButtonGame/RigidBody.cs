@@ -13,6 +13,10 @@ namespace OneButtonGame
     {
         public Vector2 Speed;
         public Vector2 Acceleration;
+        public float SmoothedSpeed
+        {
+            get { return oldSpeedsTotal() / (float) oldSpeeds.Length; }
+        }
         public float Mass
         {
             get { return _mass; }
@@ -27,6 +31,10 @@ namespace OneButtonGame
         public float Gravity;
         public bool collisions;
 
+        public int CollisionFlags;
+        
+
+        private float[] oldSpeeds;
         private float _mass;
         private float _friction;
         private Game _game;
@@ -47,6 +55,12 @@ namespace OneButtonGame
             Friction = friction;
             Gravity = gravity;
             collisions = false;
+            oldSpeeds = new float[10];
+            for(int i = 0; i < oldSpeeds.Length; i++)
+            {
+                oldSpeeds[i] = 1;
+            }
+            CollisionFlags = (int) ECollision.none;
 
             _hitTracker = (HitBoxTrackerService)_game.Services.GetService(typeof(IHitBoxTrackerService));
             Console.WriteLine(_hitTracker == null);
@@ -58,7 +72,7 @@ namespace OneButtonGame
         }
         public RigidBody(Game game)
         {
-            init(game, Vector2.Zero, 1, Vector2.Zero, new List<HitBox>(), 0.15f, 9.8f);
+            init(game, Vector2.Zero, 1, Vector2.Zero, new List<HitBox>(), 0.15f, 0f);
         }
         public RigidBody(Game game, float mass, float friction, float gravity)
         {
@@ -100,15 +114,31 @@ namespace OneButtonGame
                     Speed = Vector2.Zero;
                 }
             }
+            else
+            {
+                CollisionFlags = (int)ECollision.none;
+            }
 
+            for (int i = 0; i < oldSpeeds.Length - 1; i++)
+            {
+                oldSpeeds[i] = oldSpeeds[i + 1];
+            }
+            oldSpeeds[oldSpeeds.Length - 1] = Speed.LengthSquared();
             _transform.Position += Speed;
         }
 
-
+        private float oldSpeedsTotal()
+        {
+            float output = 0;
+            for (int i = 0; i < oldSpeeds.Length; i++)
+                output += oldSpeeds[i];
+            return output;
+        }
 
         public void AddForce(Vector2 force)
         {
-            Acceleration += force / Mass;
+            Speed += force / Mass;
+
         }
         private void updateSpeed(GameTime gameTime)
         {
@@ -147,6 +177,7 @@ namespace OneButtonGame
                 {
                     reflect += 0b10;
                 }
+                CollisionFlags += (int) collided.Type;
                 Console.WriteLine(reflect);
             }
             return reflect;
@@ -155,5 +186,14 @@ namespace OneButtonGame
         {
             _hitTracker.RegisterHitBoxes(HitBoxes);
         }
+    }
+
+    public enum ECollision
+    {
+        none = 0b0000,
+        spikes = 0b0001,
+        goal = 0b0010,
+        obstacle = 0b0100,
+        mob = 0b1000
     }
 }

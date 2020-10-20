@@ -21,12 +21,21 @@ namespace OneButtonGame
             set { if (_trackingID == -1) _trackingID = value; }
         }
         public Vector2 Origin { get { return new Vector2(_transform.Position.X + _rect.X, _transform.Position.Y + _rect.Y); }}
+        public ECollision Type;
         
 
         public HitBox(Rectangle rect, Transform transform) {
             _trackingID = -1;
             _rect = rect;
             _transform = transform;
+            Type = ECollision.obstacle;
+        }
+        public HitBox(Rectangle rect, Transform transform, ECollision type)
+        {
+            _trackingID = -1;
+            _rect = rect;
+            _transform = transform;
+            Type = type;
         }
 
         public bool CheckCollision(HitBox other)

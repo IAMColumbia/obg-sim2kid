@@ -50,9 +50,9 @@ namespace OneButtonGame
 
         protected override void LoadContent()
         {
-            base.LoadContent();
             spriteTexture = this.Game.Content.Load<Texture2D>(textureName);
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            base.LoadContent();
         }
 
         public override void Update(GameTime gameTime)

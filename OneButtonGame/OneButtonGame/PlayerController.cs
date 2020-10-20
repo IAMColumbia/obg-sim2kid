@@ -14,17 +14,15 @@ namespace OneButtonGame
         public EPlayerState State;
 
         private JumpHandler _jumper;
-        private RigidBody _rigidBody; //TODO: Reduce player down to a GameObject
-
-        protected GraphicsDeviceManager graphics;
-        protected SpriteBatch spriteBatch;
+        private KeyboardHandler _keyboard;
+        public RigidBody _rigidBody; //TODO: Reduce player down to a GameObject
+        private SpriteFont text;
 
         private Game _game;
 
         public PlayerController(Game game) : base(game, "slime")
         {
             _game = game;
-            _jumper = new JumpHandler(this, game);
             State = EPlayerState.falling;
         }
 
@@ -32,9 +30,12 @@ namespace OneButtonGame
 
         public override void Initialize()
         {
-            graphics = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
-            _rigidBody = new RigidBody(_game, 10f, 0.5f, 20f);
+            _jumper = new JumpHandler(this.Game, this);
+            _jumper.Initialize();
+            this.Game.Components.Add(_jumper);
+            _rigidBody = new RigidBody(_game, 1f, 0.5f, 20f);
             _rigidBody.collisions = true;
+            _keyboard = new KeyboardHandler();
             base.Initialize();
         }
         protected override void LoadContent()
@@ -44,18 +45,63 @@ namespace OneButtonGame
             boxes.Add(new HitBox(new Rectangle(transform.Position.X, transform.Position.Y, spriteTexture.Bounds.Width, spriteTexture.Bounds.Height), transform));
             _rigidBody.HitBoxes = boxes;
             _rigidBody.LoadContent(transform);
-            
+            _jumper.playerOrgin = new Vector2(this.spriteTexture.Bounds.Width / 2, this.spriteTexture.Bounds.Height / 2);
+            transform.Position = new Vector2(25, 200);
+            text = this.Game.Content.Load<SpriteFont>("font");
         }
         public override void Update(GameTime gameTime)
         {
-            _rigidBody.Update(gameTime);
+            _keyboard.Update();
+
+            switch (State)
+            {
+                case EPlayerState.falling:
+                    _rigidBody.Update(gameTime);
+                    if (_rigidBody.SmoothedSpeed < 0.1f)
+                    {
+                        Land();
+                    }
+                    if ((_rigidBody.CollisionFlags & (int)ECollision.spikes) == (int)ECollision.spikes)
+                    {
+                        Die();
+                    }
+                    if ((_rigidBody.CollisionFlags & (int)ECollision.goal) == (int)ECollision.goal)
+                    {
+                        Win();
+                    }
+                    break;
+                case EPlayerState.idle:
+                    if (_keyboard.onKeyDown(Keys.Space))
+                    {
+                        PrepareJump();
+                    }
+                    break;
+                case EPlayerState.jumping:
+                    if (_keyboard.onKeyUp(Keys.Space))
+                    {
+                        Jump();
+                    }
+                    break;
+            }
             base.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
+            switch (State)
+            {
+                case EPlayerState.dead:
+                    spriteBatch.Begin();
+                    spriteBatch.DrawString(text, "YOU LOSE!!!", new Vector2(50, 50), Color.DarkRed, 0, Vector2.Zero, 10, SpriteEffects.None, 0);
+                    spriteBatch.End();
+                    break;
+                case EPlayerState.win:
+                    spriteBatch.Begin();
+                    spriteBatch.DrawString(text, "YOU WIN!!!", new Vector2(50, 50), Color.DarkGreen, 0, Vector2.Zero, 10, SpriteEffects.None, 0);
+                    spriteBatch.End();
+                    break;
+            }
         }
-
 
 
         public void PrepareJump()
@@ -64,17 +110,24 @@ namespace OneButtonGame
         }
         public void Jump()
         {
+            _jumper.Hide();
+            _rigidBody.AddForce(_jumper.Launch());
             State = EPlayerState.falling;
         }
         public void Land()
         {
             State = EPlayerState.landing;
             State = EPlayerState.idle;
+            _jumper.Show();
         }
         public void Die()
         {
             State = EPlayerState.dying;
             State = EPlayerState.dead;
+        }
+        public void Win()
+        {
+            State = EPlayerState.win;
         }
     }
 
@@ -85,6 +138,7 @@ namespace OneButtonGame
         falling,
         landing,
         dying,
-        dead
+        dead,
+        win
     }
 }
