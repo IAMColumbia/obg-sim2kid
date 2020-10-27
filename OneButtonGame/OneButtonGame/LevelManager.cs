@@ -11,8 +11,8 @@ namespace OneButtonGame
 {
     public class LevelManager : DrawableGameComponent
     {
-        //private int _level;
-        public GameObject ground, ceiling, lWall, rWall, piller1, piller2, platform1, platform2, dspike1, dspike2, dspike3, uspike1, uspike2, goal;
+        private int _level;
+        Dictionary<string, GameObject> _objects;
         public SpriteFont font;
         private Game _game;
 
@@ -22,39 +22,19 @@ namespace OneButtonGame
         public LevelManager(Game game) : base(game)
         {
             _game = game;
-            ground = new GameObject(_game, "floor"); // tons of technical debt
-            ceiling = new GameObject(_game, "floor");
-            lWall = new GameObject(_game, "wall");
-            rWall = new GameObject(_game, "wall");
-            piller1 = new GameObject(_game, "piller");
-            piller2 = new GameObject(_game, "piller");
-            platform1 = new GameObject(_game, "platform");
-            platform2 = new GameObject(_game, "platform");
-            dspike1 = new GameObject(_game, "spikesdown", ECollision.spikes);
-            dspike2 = new GameObject(_game, "spikesdown", ECollision.spikes);
-            dspike3 = new GameObject(_game, "spikesdown", ECollision.spikes);
-            uspike1 = new GameObject(_game, "spikesup", ECollision.spikes);
-            uspike2 = new GameObject(_game, "spikesup", ECollision.spikes);
-            goal = new GameObject(_game, "goal", ECollision.goal);
-
-            _game.Components.Add(ground);
-            _game.Components.Add(ceiling);
-            _game.Components.Add(lWall);
-            _game.Components.Add(rWall);
-            _game.Components.Add(piller1);
-            _game.Components.Add(piller2);
-            _game.Components.Add(platform1);
-            _game.Components.Add(platform2);
-            _game.Components.Add(dspike1);
-            _game.Components.Add(dspike2);
-            _game.Components.Add(dspike3);
-            _game.Components.Add(uspike1);
-            _game.Components.Add(uspike2);
-            _game.Components.Add(goal);
+            _objects = new Dictionary<string, GameObject>();
         }
 
         public override void Initialize()
         {
+            _level = 1;
+            defineLevel();
+            
+            foreach (KeyValuePair<string, GameObject> entry in _objects)
+            {
+                _game.Components.Add(entry.Value);
+            }
+
             base.Initialize();
             graphics = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
         }
@@ -63,24 +43,9 @@ namespace OneButtonGame
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = this.Game.Content.Load<SpriteFont>("font");
-            ground.transform.Position = new Vector2(0,700);
-            ceiling.transform.Position = new Vector2(0, 0);
-            lWall.transform.Position = new Vector2(0, -1440);
-            rWall.transform.Position = new Vector2(1260, -1440);
-            
-            piller1.transform.Position = new Vector2(256, 508);
-            piller2.transform.Position = new Vector2(800, 444);
-            platform1.transform.Position = new Vector2(928, 168);
-            platform2.transform.Position = new Vector2(448, 332);
 
-            dspike1.transform.Position = new Vector2(192, 20);
-            dspike2.transform.Position = new Vector2(320, 20);
-            dspike3.transform.Position = new Vector2(928, 232);
-            uspike1.transform.Position = new Vector2(384, 668);
-            uspike2.transform.Position = new Vector2(926, 668);
+            loadLevel();
 
-            goal.transform.Position = new Vector2(1196, 572);
-            
             base.LoadContent();
         }
 
@@ -90,6 +55,66 @@ namespace OneButtonGame
             spriteBatch.DrawString(font, "Press Space to Jump!", new Vector2(512, 40), Color.Black, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
             spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        private void defineLevel() 
+        {
+            switch (_level) 
+            {
+                case 1:
+                    _objects.Add("ground", new GameObject(_game, "floor"));
+                    _objects.Add("ceiling", new GameObject(_game, "floor"));
+                    _objects.Add("lWall", new GameObject(_game, "wall"));
+                    _objects.Add("rWall", new GameObject(_game, "wall"));
+                    _objects.Add("piller1", new GameObject(_game, "piller"));
+                    _objects.Add("piller2", new GameObject(_game, "piller"));
+                    _objects.Add("platform1", new GameObject(_game, "platform"));
+                    _objects.Add("platform2", new GameObject(_game, "platform"));
+
+                    _objects.Add("dspike1", new GameObject(_game, "spikesdown", ECollision.spikes));
+                    _objects.Add("dspike2", new GameObject(_game, "spikesdown", ECollision.spikes));
+                    _objects.Add("dspike3", new GameObject(_game, "spikesdown", ECollision.spikes));
+                    _objects.Add("uspike1", new GameObject(_game, "spikesup", ECollision.spikes));
+                    _objects.Add("uspike2", new GameObject(_game, "spikesup", ECollision.spikes));
+
+                    _objects.Add("goal", new GameObject(_game, "goal", ECollision.goal));
+                    break;
+            }
+        }
+
+        private void loadLevel()
+        {
+            switch (_level)
+            {
+                case 1:
+                    _objects["ground"].transform.Position = new Vector2(0, 700);
+                    _objects["ceiling"].transform.Position = new Vector2(0, 0);
+                    _objects["lWall"].transform.Position = new Vector2(0, -1440);
+                    _objects["rWall"].transform.Position = new Vector2(1260, -1440);
+
+                    _objects["piller1"].transform.Position = new Vector2(256, 508);
+                    _objects["piller2"].transform.Position = new Vector2(800, 444);
+                    _objects["platform1"].transform.Position = new Vector2(928, 168);
+                    _objects["platform2"].transform.Position = new Vector2(448, 332);
+
+                    _objects["dspike1"].transform.Position = new Vector2(192, 20);
+                    _objects["dspike2"].transform.Position = new Vector2(320, 20);
+                    _objects["dspike3"].transform.Position = new Vector2(928, 232);
+                    _objects["uspike1"].transform.Position = new Vector2(384, 668);
+                    _objects["uspike2"].transform.Position = new Vector2(926, 668);
+
+                    _objects["goal"].transform.Position = new Vector2(1196, 572);
+                    break;
+            }
+        }
+
+        private void unloadLevel() 
+        {
+            foreach (KeyValuePair<string, GameObject> entry in _objects)
+            {
+                _game.Components.Remove(entry.Value);
+            }
+            _objects = new Dictionary<string, GameObject>();
         }
     }
 }
