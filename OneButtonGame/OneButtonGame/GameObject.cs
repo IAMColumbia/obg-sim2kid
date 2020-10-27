@@ -61,5 +61,9 @@ namespace OneButtonGame
             Rigidbody.Update(gameTime);
             base.Update(gameTime);
         }
+        public void Unload() 
+        {
+            Rigidbody.Unload();
+        }
     }
 }

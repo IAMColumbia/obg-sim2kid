@@ -45,6 +45,12 @@ namespace OneButtonGame
 
 
         #region Constructors
+        public void Reset() 
+        {
+            Speed = Vector2.Zero;
+            Acceleration = Vector2.Zero;
+            CollisionFlags = (int)ECollision.none;
+        }
         private void init(Game game, Vector2 speed, float mass, Vector2 acceleration, List<HitBox> boxes, float friction, float gravity)
         {
             _game = game;
@@ -63,7 +69,6 @@ namespace OneButtonGame
             CollisionFlags = (int) ECollision.none;
 
             _hitTracker = (HitBoxTrackerService)_game.Services.GetService(typeof(IHitBoxTrackerService));
-            Console.WriteLine(_hitTracker == null);
             if (_hitTracker == null)
             {
                 _hitTracker = new HitBoxTrackerService(_game);
@@ -83,6 +88,11 @@ namespace OneButtonGame
             init(game, Vector2.Zero, mass, Vector2.Zero, hitBoxes, friction, gravity);
         }
         #endregion
+
+        public void Unload() 
+        {
+            _hitTracker.UnRegisterHitBoxes(HitBoxes);
+        }
         
         public void LoadContent(Transform transform)
         {
@@ -113,11 +123,15 @@ namespace OneButtonGame
                 {
                     Speed = Vector2.Zero;
                 }
+
+                Console.WriteLine("reflection: " + reflection + "  Speed: ( " + Speed.X + " , " + Speed.Y + " )  Location: ( " + _transform.Position.X + " , " + _transform.Position.Y + " )");
             }
             else
             {
                 CollisionFlags = (int)ECollision.none;
             }
+
+            
 
             for (int i = 0; i < oldSpeeds.Length - 1; i++)
             {
@@ -178,7 +192,6 @@ namespace OneButtonGame
                     reflect += 0b10;
                 }
                 CollisionFlags += (int) collided.Type;
-                Console.WriteLine(reflect);
             }
             return reflect;
         }
@@ -190,10 +203,10 @@ namespace OneButtonGame
 
     public enum ECollision
     {
-        none = 0b0000,
-        spikes = 0b0001,
-        goal = 0b0010,
-        obstacle = 0b0100,
-        mob = 0b1000
+        none = 0b0000, // 0
+        spikes = 0b0001, // 1
+        goal = 0b0010, // 2
+        obstacle = 0b0100, // 4
+        mob = 0b1000 // 8
     }
 }

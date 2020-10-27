@@ -26,7 +26,11 @@ namespace OneButtonGame
             State = EPlayerState.falling;
         }
 
-
+        public void Reset(Vector2 position) 
+        {
+            transform.Position = position;
+            _rigidBody.Reset();
+        }
 
         public override void Initialize()
         {

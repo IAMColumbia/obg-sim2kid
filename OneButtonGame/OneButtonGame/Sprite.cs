@@ -27,6 +27,7 @@ namespace OneButtonGame
         public Sprite(Game game) : base(game)
         {
             textureName = "";
+            
         }
         public Sprite(Game game, string texture) : base(game)
         {
@@ -34,11 +35,6 @@ namespace OneButtonGame
         }
 
 
-
-        /// <summary>
-        /// Allows the game component to perform any initialization it needs to before starting
-        /// to run.  This is where it can query for any required services and load content.
-        /// </summary>
         public override void Initialize()
         {
             transform = new Transform();

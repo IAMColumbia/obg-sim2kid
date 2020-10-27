@@ -13,6 +13,9 @@ namespace OneButtonGame
     {
         private int _level;
         Dictionary<string, GameObject> _objects;
+
+        private PlayerController slime;
+        private KeyboardHandler _keyboard;
         public SpriteFont font;
         private Game _game;
 
@@ -23,18 +26,17 @@ namespace OneButtonGame
         {
             _game = game;
             _objects = new Dictionary<string, GameObject>();
+
+            slime = new PlayerController(_game);
+            _game.Components.Add(slime);
+
+            _level = 0;
+            NextLevel();
         }
 
         public override void Initialize()
         {
-            _level = 1;
-            defineLevel();
-            
-            foreach (KeyValuePair<string, GameObject> entry in _objects)
-            {
-                _game.Components.Add(entry.Value);
-            }
-
+            _keyboard = new KeyboardHandler();
             base.Initialize();
             graphics = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
         }
@@ -52,13 +54,41 @@ namespace OneButtonGame
         public override void Draw(GameTime gameTime)
         {
             spriteBatch.Begin();
-            spriteBatch.DrawString(font, "Press Space to Jump!", new Vector2(512, 40), Color.Black, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
+            spriteBatch.DrawString(font, "Hold Space to Jump!", new Vector2(512, 40), Color.Black, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
             spriteBatch.End();
             base.Draw(gameTime);
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            _keyboard.Update();
+            switch (slime.State)
+            {
+                case EPlayerState.dead:
+                    if (_keyboard.onKeyDown(Keys.Space))
+                    {
+                        ReloadLevel();
+                    }
+                    break;
+                case EPlayerState.win:
+                    if (_keyboard.onKeyDown(Keys.Space))
+                    {
+                        ReloadLevel(); // Should be next level but only 1 level exists
+                    }
+                    break;
+            }
+#if DEBUG
+            if (_keyboard.onKeyDown(Keys.R))
+            {
+                ReloadLevel(); // Should be next level but only 1 level exists
+            }
+#endif
+            base.Update(gameTime);
+        }
+
         private void defineLevel() 
         {
+            
             switch (_level) 
             {
                 case 1:
@@ -80,13 +110,22 @@ namespace OneButtonGame
                     _objects.Add("goal", new GameObject(_game, "goal", ECollision.goal));
                     break;
             }
+
+            foreach (KeyValuePair<string, GameObject> entry in _objects)
+            {
+                _game.Components.Add(entry.Value);
+            }
         }
+
+        
 
         private void loadLevel()
         {
+            slime.State = EPlayerState.falling;
             switch (_level)
             {
                 case 1:
+                    slime.Reset(new Vector2(25, 200));
                     _objects["ground"].transform.Position = new Vector2(0, 700);
                     _objects["ceiling"].transform.Position = new Vector2(0, 0);
                     _objects["lWall"].transform.Position = new Vector2(0, -1440);
@@ -112,9 +151,30 @@ namespace OneButtonGame
         {
             foreach (KeyValuePair<string, GameObject> entry in _objects)
             {
+                entry.Value.Unload();
                 _game.Components.Remove(entry.Value);
             }
             _objects = new Dictionary<string, GameObject>();
+
+        }
+
+        public void NextLevel() 
+        {
+            unloadLevel();
+            _level++;
+            ReloadLevel();
+        }
+
+        public void ReloadLevel() 
+        {
+            unloadLevel();
+
+            defineLevel();
+            try
+            {
+                loadLevel();
+            }
+            catch (Exception e) {}
         }
     }
 }

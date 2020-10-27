@@ -12,6 +12,6 @@ namespace OneButtonGame
 
         void ClearHitBoxes();
         void RegisterHitBoxes(List<HitBox> boxes);
-
+        void UnRegisterHitBoxes(List<HitBox> boxes);
     }
 }

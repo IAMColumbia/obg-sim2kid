@@ -12,7 +12,6 @@ namespace OneButtonGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        PlayerController slime;
         LevelManager lm;
 
         public Game1()
@@ -26,8 +25,6 @@ namespace OneButtonGame
 
             lm = new LevelManager(this);
             this.Components.Add(lm);
-            slime = new PlayerController(this);
-            this.Components.Add(slime);
         }
 
         /// <summary>
@@ -60,7 +57,6 @@ namespace OneButtonGame
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
             // TODO: Add your update logic here
 
             base.Update(gameTime);

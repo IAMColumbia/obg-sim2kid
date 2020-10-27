@@ -35,6 +35,14 @@ namespace OneButtonGame
                 WorldHitBoxes.Add(box);
             }
         }
+        public void UnRegisterHitBoxes(List<HitBox> boxes) 
+        {
+            foreach (HitBox box in boxes)
+            {
+                WorldHitBoxes.Remove(box);
+            }
+        }
+
         public void RegisterHitBox(HitBox box)
         {
             box.TrackingID = WorldHitBoxes.Count + 1;
