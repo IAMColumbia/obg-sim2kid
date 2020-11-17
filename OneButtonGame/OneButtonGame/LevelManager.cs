@@ -46,9 +46,8 @@ namespace OneButtonGame
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = this.Game.Content.Load<SpriteFont>("font");
 
-            loadLevel();
-
             base.LoadContent();
+            loadLevel();
         }
 
         public override void Draw(GameTime gameTime)
@@ -174,7 +173,7 @@ namespace OneButtonGame
             {
                 loadLevel();
             }
-            catch (Exception e) {}
+            catch{}
         }
     }
 }

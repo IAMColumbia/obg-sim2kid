@@ -28,8 +28,10 @@ namespace OneButtonGame
 
         public void Reset(Vector2 position) 
         {
-            transform.Position = position;
-            _rigidBody.Reset();
+            if(transform != null)
+                transform.Position = position;
+            if(_rigidBody != null)
+                _rigidBody.Reset();
         }
 
         public override void Initialize()
