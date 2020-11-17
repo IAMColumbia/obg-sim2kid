@@ -121,6 +121,10 @@ namespace OneButtonGame
         private void loadLevel()
         {
             slime.State = EPlayerState.falling;
+            if (_objects.First().Value.transform == null)
+            {
+                return;
+            }
             switch (_level)
             {
                 case 1:
